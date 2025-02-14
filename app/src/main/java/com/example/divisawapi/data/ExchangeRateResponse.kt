@@ -11,5 +11,5 @@ data class ExchangeRateResponse(
     val time_next_update_utc: String,
     val time_eol_unix: Long,
     val base_code: String,
-    val rates: Map<String, Double>
+    val conversion_rates: Map<String, Double>
 )
