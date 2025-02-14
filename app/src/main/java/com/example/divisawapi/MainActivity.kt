@@ -12,19 +12,20 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val workRequest = PeriodicWorkRequestBuilder<ExchangeRateWorker>(60, TimeUnit.MINUTES).build()
+        /*
+        val workRequest = PeriodicWorkRequestBuilder<ExchangeRateWorker>(15, TimeUnit.MINUTES).build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "exchange_rate_worker",
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
+        */
         //Prueba Instantanea
-        /*val workRequest = OneTimeWorkRequestBuilder<ExchangeRateWorker>().build()
+        val workRequest = OneTimeWorkRequestBuilder<ExchangeRateWorker>().build()
 
         WorkManager.getInstance(this).enqueue(workRequest)
-        */
+
         finish()
     }
 }
