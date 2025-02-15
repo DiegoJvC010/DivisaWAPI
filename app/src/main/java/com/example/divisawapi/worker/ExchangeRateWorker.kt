@@ -12,8 +12,12 @@ class ExchangeRateWorker(context: Context, params: WorkerParameters): CoroutineW
 
     override suspend fun doWork(): Result {
         try {
+            Log.e("jijijijiji","No charching madafaka")
             val data = repository.fetchExchangeRatesFromRemote()
+            Log.e("jijijijiji","No charching ")
             if (data != null){
+
+                Log.e("jijijijiji","No charching madafaka")
                 val entity = ExchangeRateEntity(
                     timeLastUpdateUtc = data.time_last_update_utc,
                     timeNextUpdateUtc =  data.time_next_update_utc,

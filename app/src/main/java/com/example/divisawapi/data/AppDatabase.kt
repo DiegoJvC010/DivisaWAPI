@@ -14,15 +14,19 @@ abstract class AppDatabase : RoomDatabase() {
 
     // Singleton para asegurar que solo haya una instancia de la base de datos en ejecución.
     companion object {
-        @Volatile private var instance: AppDatabase? = null
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase =
-            instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "divisas_db"
-                ).build().also { instance = it }
+                    "exchange_rate_database"
+                ).build()
+                INSTANCE = instance
+                instance
             }
+        }
     }
 }

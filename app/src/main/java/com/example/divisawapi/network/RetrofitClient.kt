@@ -5,9 +5,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 
 object RetrofitClient{
-    private const val urlBase = "https://v6.exchangerate-api.com/"
+    private const val BASE_URL = "https://v6.exchangerate-api.com/"
 
     val apiService: ApiService by lazy {
-        Retrofit.Builder().baseUrl(urlBase).addConverterFactory(GsonConverterFactory.create()).build().create(ApiService::class.java)
+        Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build().create(ApiService::class.java)
     }
 }
