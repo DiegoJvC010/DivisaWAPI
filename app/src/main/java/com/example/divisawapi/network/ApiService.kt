@@ -5,6 +5,6 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface ApiService{
-    @GET("v6/acbae99336b098792024ca02/latest/MXN")
+    @GET("v6/21979ca005773ce125edf08e/latest/MXN")
     suspend fun getExchangeRates(): Response<ExchangeRateResponse>
 }
