@@ -1,5 +1,6 @@
 package com.example.divisawapi.data
 
+import android.database.Cursor
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -16,5 +17,11 @@ interface ExchangeRateDao {
 
     @Query("SELECT * FROM exchange_rates ORDER BY id DESC")
     suspend fun getAllRates(): List<ExchangeRateEntity>
+
+    @Query("SELECT * FROM exchange_rates WHERE timeLastUpdateUtc BETWEEN :startDate AND :endDate ORDER BY id DESC")
+    fun getRatesByDateRange(startDate: String, endDate: String): Cursor
+
+    @Query("SELECT * FROM exchange_rates ORDER BY id DESC")
+    fun getAllRatesCursor(): Cursor
 
 }

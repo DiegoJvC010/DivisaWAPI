@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <permission
+        android:name="com.example.divisawapi.permission.ACCESS_DIVISA"
+        android:protectionLevel="signature" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,6 +18,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DivisaWAPI"
         tools:targetApi="31">
+
+        <provider
+            android:name=".provider.DivisasContentProvider"
+            android:authorities="com.example.divisawapi.divisasprovider"
+            android:exported="true"
+            android:permission="com.example.divisawapi.permission.ACCESS_DIVISA" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
