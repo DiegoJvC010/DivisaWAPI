@@ -18,9 +18,8 @@ interface ExchangeRateDao {
     @Query("SELECT * FROM exchange_rates ORDER BY id DESC")
     suspend fun getAllRates(): List<ExchangeRateEntity>
 
-    @Query("SELECT * FROM exchange_rates WHERE timeLastUpdateUtc BETWEEN :startDate AND :endDate ORDER BY id DESC")
-    fun getRatesByDateRange(startDate: String, endDate: String): Cursor
-
+    //Obtiene todos los registros de la tabla en orden descendente por ID y los devuelve en un Cursor
+    //para el ContentProvider
     @Query("SELECT * FROM exchange_rates ORDER BY id DESC")
     fun getAllRatesCursor(): Cursor
 

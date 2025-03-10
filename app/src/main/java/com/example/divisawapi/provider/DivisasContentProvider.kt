@@ -12,10 +12,11 @@ import com.example.divisawapi.data.Converters
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class DivisasContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        return true
+        return true  //El ContentProvider fue creado correctamente
     }
 
     override fun query(
@@ -25,23 +26,25 @@ class DivisasContentProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        // 1. Verificar el permiso
+
+        //Verifica que la aplicacion que hace la consulta tenga el permiso necesario
         val requiredPermission = "com.example.divisawapi.permission.ACCESS_DIVISA"
         if (context?.checkCallingOrSelfPermission(requiredPermission) != PackageManager.PERMISSION_GRANTED) {
             throw SecurityException("Se requiere el permiso $requiredPermission para acceder a este ContentProvider.")
         }
 
-        // 2. Extraer parámetros
-        val currency = uri.getQueryParameter("currency")
-        val startDateStr = uri.getQueryParameter("startDate")
-        val endDateStr = uri.getQueryParameter("endDate")
+        //Extrae los parametros enviados en la consulta (la moneda y el rango de fechas)
+        val currency = uri.getQueryParameter("currency") //Moneda solicitada (ejemplo: "trumpcoins")
+        val startDateStr = uri.getQueryParameter("startDate") //Fecha de inicio del rango
+        val endDateStr = uri.getQueryParameter("endDate") //Fecha de fin del rango
 
+        //Si falta algun parametro, se muestra un error y se detiene la consulta(pa debugiar)
         if (currency.isNullOrEmpty() || startDateStr.isNullOrEmpty() || endDateStr.isNullOrEmpty()) {
             Log.e("DivisasContentProvider", "Faltan parámetros: currency, startDate o endDate.")
             return null
         }
 
-        // 3. Parsear las fechas de inicio y fin
+        //Convertir las fechas recibidas (en formato String) a objetos Date
         val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
         val startDate: Date
         val endDate: Date
@@ -53,35 +56,34 @@ class DivisasContentProvider : ContentProvider() {
             return null
         }
 
-        // 4. Obtener TODOS los registros
-        val db = AppDatabase.getDatabase(context!!)
-        val rawCursor = db.exchangeRateDao().getAllRatesCursor() // En vez de getRatesByDateRange
+        //Obtener todos los registros de la base de datos
+        val db = AppDatabase.getDatabase(context!!) //Aqui se accede a la base de datos
+        val rawCursor = db.exchangeRateDao().getAllRatesCursor() //Aqui se Obtienen las tasas de cambio
 
-        // 5. Crear un MatrixCursor para exponer los resultados
+        //Cursor para devolver los resultados filtrados
         val matrixCursor = MatrixCursor(
             arrayOf(
-                DivisasContract.COLUMN_ID,
-                DivisasContract.COLUMN_TIME_LAST_UPDATE,
-                DivisasContract.COLUMN_EXCHANGE_RATE
+                DivisasContract.COLUMN_ID, //ID del registro
+                DivisasContract.COLUMN_TIME_LAST_UPDATE, //Fecha de la actualizacion
+                DivisasContract.COLUMN_EXCHANGE_RATE //Valor de la tasa de cambio
             )
         )
-
-        // 6. Convertir la columna 'rates' a Map
+        //Convertidor para transformar la columna 'rates' a Map
         val converters = Converters()
 
-        // 7. Recorrer todos los registros y filtrar en memoria
+        //Recorrer todos los registros obtenidos de la base de datos y filtrarlos
         rawCursor?.use { cursor ->
-            // Índices de columnas
+            //Indices de columnas
             val colId = cursor.getColumnIndexOrThrow("id")
             val colTimeUpdate = cursor.getColumnIndexOrThrow("timeLastUpdateUtc")
             val colRates = cursor.getColumnIndexOrThrow("rates")
 
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(colId)
-                val timeLastUpdateStr = cursor.getString(colTimeUpdate)
-                val ratesJson = cursor.getString(colRates)
+                val timeLastUpdateStr = cursor.getString(colTimeUpdate)//Fecha de actualizacion (String)
+                val ratesJson = cursor.getString(colRates)//JSON con las tasas de cambio
 
-                // Parsear la fecha de la BD
+                //Convertir la fecha obtenida de la BD a un objeto Date
                 val recordDate = try {
                     dateFormat.parse(timeLastUpdateStr)
                 } catch (e: Exception) {
@@ -89,11 +91,14 @@ class DivisasContentProvider : ContentProvider() {
                 }
 
                 if (recordDate != null) {
-                    // Verificar si está en el rango [startDate, endDate]
+                    //Verificar si la fecha está dentro del rango solicitado por el usuario
                     if (!recordDate.before(startDate) && !recordDate.after(endDate)) {
-                        // Está dentro del rango
+
+                        //Convertir los valores JSON en un mapa de tasas de cambio
                         val rateMap = converters.toRatesMap(ratesJson)
-                        val exchangeRate = rateMap[currency]
+                        val exchangeRate = rateMap[currency]//Obtener la tasa de cambio solicitada
+
+                        //Si la tasa de cambio existe, se agrega al cursor
                         if (exchangeRate != null) {
                             matrixCursor.addRow(arrayOf(id, timeLastUpdateStr, exchangeRate))
                         }
@@ -101,7 +106,7 @@ class DivisasContentProvider : ContentProvider() {
                 }
             }
         }
-
+        //Se devuelven los datos filtrados en el cursor
         return matrixCursor
     }
 
@@ -118,6 +123,7 @@ class DivisasContentProvider : ContentProvider() {
     }
 
     override fun getType(uri: Uri): String? {
+        //Indica que este ContentProvider devuelve una lista de registros
         return "vnd.android.cursor.dir/vnd.${DivisasContract.AUTHORITY}.exchange_rates"
     }
 }
